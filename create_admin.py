@@ -8,10 +8,9 @@ with app.app_context():
     print("=== M World Luxury - Create Admin ===")
 
     username = 'MOSCOWW'
-    email    = 'dennisbija234@gmail.com'
+    email    = 'eriggap16@gmail.com'
     password = 'DENNIS234'
 
-    # Check if username or email already exists
     existing = User.query.filter(
         (User.username == username) | (User.email == email)
     ).first()
