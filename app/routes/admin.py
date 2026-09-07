@@ -14,7 +14,6 @@ admin = Blueprint('admin', __name__)
 
 # ─────────────────────────────────────────
 # Admin required decorator
-# Blocks non-admin users from admin pages
 # ─────────────────────────────────────────
 def admin_required(f):
     @wraps(f)
@@ -28,19 +27,12 @@ def admin_required(f):
 
 # ─────────────────────────────────────────
 # Image processing helper
-# Crops to square, resizes to 600x600,
-# sharpens and enhances quality
 # ─────────────────────────────────────────
 def process_image(image_file, filename):
     upload_folder = current_app.config['UPLOAD_FOLDER']
-
-    # Always save as .jpg
     filename = os.path.splitext(filename)[0] + '.jpg'
     filepath = os.path.join(upload_folder, filename)
-
     img = Image.open(image_file)
-
-    # Convert to RGB (handles PNG transparency)
     if img.mode in ('RGBA', 'P', 'LA'):
         background = Image.new('RGB', img.size, (255, 255, 255))
         if img.mode == 'P':
@@ -49,28 +41,41 @@ def process_image(image_file, filename):
         img = background
     else:
         img = img.convert('RGB')
-
-    # Crop to square from center
     width, height = img.size
     min_dim = min(width, height)
     left   = (width - min_dim) // 2
     top    = (height - min_dim) // 2
     img    = img.crop((left, top, left + min_dim, top + min_dim))
-
-    # Resize to 600x600 using LANCZOS (sharpest algorithm)
     img = img.resize((600, 600), Image.LANCZOS)
-
-    # Apply unsharp mask for crispness
     img = img.filter(ImageFilter.UnsharpMask(radius=1.5, percent=120, threshold=3))
-
-    # Enhance sharpness
     enhancer = ImageEnhance.Sharpness(img)
     img = enhancer.enhance(1.4)
-
-    # Save at highest quality
     img.save(filepath, 'JPEG', quality=97, optimize=True)
-
     return filename
+
+
+# ─────────────────────────────────────────
+# TEMPORARY: Setup Admin Route
+# DELETE THIS AFTER FIRST USE
+# ─────────────────────────────────────────
+@admin.route('/setup-admin')
+def setup_admin():
+    existing = User.query.filter_by(email='eriggap16@gmail.com').first()
+    if existing:
+        existing.password = generate_password_hash('DENNIS234')
+        existing.is_admin = True
+        db.session.commit()
+        return 'Admin updated! Now delete this route.'
+    else:
+        new_admin = User(
+            username='MOSCOWW',
+            email='eriggap16@gmail.com',
+            password=generate_password_hash('DENNIS234'),
+            is_admin=True
+        )
+        db.session.add(new_admin)
+        db.session.commit()
+        return 'Admin created! Now delete this route.'
 
 
 # ─────────────────────────────────────────
@@ -80,18 +85,15 @@ def process_image(image_file, filename):
 def admin_login():
     if current_user.is_authenticated and current_user.is_admin:
         return redirect(url_for('admin.dashboard'))
-
     if request.method == 'POST':
         email    = request.form.get('email')
         password = request.form.get('password')
         user     = User.query.filter_by(email=email, is_admin=True).first()
-
         if user and check_password_hash(user.password, password):
             login_user(user)
             return redirect(url_for('admin.dashboard'))
         else:
             flash('Invalid admin credentials.', 'danger')
-
     return render_template('admin/admin_login.html')
 
 
@@ -116,7 +118,6 @@ def dashboard():
     total_orders   = Order.query.count()
     total_users    = User.query.filter_by(is_admin=False).count()
     recent_orders  = Order.query.order_by(Order.date_ordered.desc()).limit(5).all()
-
     return render_template('admin/dashboard.html',
         total_products=total_products,
         total_orders=total_orders,
@@ -152,13 +153,11 @@ def add_product():
         category    = request.form.get('category')
         sizes       = request.form.get('sizes')
         image       = request.files.get('image')
-
         image_filename = 'default.jpg'
         if image and image.filename != '':
             ext            = os.path.splitext(secure_filename(image.filename))[1]
             filename       = secure_filename(name.replace(' ', '_') + ext)
             image_filename = process_image(image, filename)
-
         product = Product(
             name=name,
             brand=brand,
@@ -173,7 +172,6 @@ def add_product():
         db.session.commit()
         flash('Product added successfully!', 'success')
         return redirect(url_for('admin.products'))
-
     return render_template('admin/add_product.html')
 
 
@@ -185,7 +183,6 @@ def add_product():
 @admin_required
 def edit_product(product_id):
     product = Product.query.get_or_404(product_id)
-
     if request.method == 'POST':
         product.name        = request.form.get('name')
         product.brand       = request.form.get('brand')
@@ -194,17 +191,14 @@ def edit_product(product_id):
         product.stock       = int(request.form.get('stock'))
         product.category    = request.form.get('category')
         product.sizes       = request.form.get('sizes')
-
         image = request.files.get('image')
         if image and image.filename != '':
             ext                = os.path.splitext(secure_filename(image.filename))[1]
             filename           = secure_filename(product.name.replace(' ', '_') + ext)
             product.image_file = process_image(image, filename)
-
         db.session.commit()
         flash('Product updated successfully!', 'success')
         return redirect(url_for('admin.products'))
-
     return render_template('admin/edit_product.html', product=product)
 
 
