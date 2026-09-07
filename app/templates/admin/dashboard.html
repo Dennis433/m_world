@@ -1,0 +1,64 @@
+{% extends 'admin/admin_base.html' %}
+{% block content %}
+
+<h2 class="fw-bold mb-4">Dashboard</h2>
+
+<!-- Stats Cards -->
+<div class="row mb-5">
+    <div class="col-md-4 mb-3">
+        <div class="card text-white bg-dark shadow text-center p-3">
+            <h6 class="text-uppercase text-muted">Total Products</h6>
+            <h2 class="fw-bold">{{ total_products }}</h2>
+        </div>
+    </div>
+    <div class="col-md-4 mb-3">
+        <div class="card text-white bg-dark shadow text-center p-3">
+            <h6 class="text-uppercase text-muted">Total Orders</h6>
+            <h2 class="fw-bold">{{ total_orders }}</h2>
+        </div>
+    </div>
+    <div class="col-md-4 mb-3">
+        <div class="card text-white bg-dark shadow text-center p-3">
+            <h6 class="text-uppercase text-muted">Total Customers</h6>
+            <h2 class="fw-bold">{{ total_users }}</h2>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Orders -->
+<h4 class="fw-bold mb-3">Recent Orders</h4>
+{% if recent_orders %}
+<table class="table table-bordered table-hover">
+    <thead class="table-dark">
+        <tr>
+            <th>Order ID</th>
+            <th>Customer</th>
+            <th>Date</th>
+            <th>Total</th>
+            <th>Status</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for order in recent_orders %}
+        <tr>
+            <td>#{{ order.id }}</td>
+            <td>{{ order.customer.username }}</td>
+            <td>{{ order.date_ordered.strftime('%d %b %Y') }}</td>
+            <td>${{ "%.2f"|format(order.get_total()) }}</td>
+            <td>
+                <span class="badge
+                    {% if order.status == 'Delivered' %}bg-success
+                    {% elif order.status == 'Shipped' %}bg-primary
+                    {% else %}bg-warning text-dark{% endif %}">
+                    {{ order.status }}
+                </span>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+    <p class="text-muted">No orders yet.</p>
+{% endif %}
+
+{% endblock %}

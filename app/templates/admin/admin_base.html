@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin - M World Luxury</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        body { display: flex; min-height: 100vh; }
+        #sidebar {
+            width: 240px; background: #111; color: white;
+            padding: 20px; min-height: 100vh; flex-shrink: 0;
+        }
+        #sidebar a { color: #aaa; text-decoration: none; display: block; padding: 8px 0; }
+        #sidebar a:hover { color: white; }
+        #sidebar .brand { font-size: 1.2rem; font-weight: bold; color: white; margin-bottom: 30px; }
+        #main { flex: 1; padding: 30px; background: #f8f9fa; }
+    </style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<div id="sidebar">
+    <div class="brand">👟 M World Luxury<br><small class="text-muted" style="font-size:0.7rem;">Admin Panel</small></div>
+    <a href="{{ url_for('admin.dashboard') }}"><i class="bi bi-speedometer2 me-2"></i> Dashboard</a>
+    <a href="{{ url_for('admin.products') }}"><i class="bi bi-box-seam me-2"></i> Products</a>
+    <a href="{{ url_for('admin.add_product') }}"><i class="bi bi-plus-circle me-2"></i> Add Product</a>
+    <a href="{{ url_for('admin.orders') }}"><i class="bi bi-bag-check me-2"></i> Orders</a>
+    <a href="{{ url_for('negotiate.admin_negotiations') }}"><i class="bi bi-chat-dots me-2"></i> Negotiations</a>
+    <hr style="border-color:#333">
+    <a href="{{ url_for('admin.admin_logout') }}"><i class="bi bi-box-arrow-left me-2"></i> Logout</a>
+</div>
+
+<!-- Main Content -->
+<div id="main">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }} alert-dismissible fade show">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    {% block content %}{% endblock %}
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

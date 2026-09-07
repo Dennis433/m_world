@@ -1,0 +1,122 @@
+{% extends 'admin/admin_base.html' %}
+{% block content %}
+
+<style>
+  .nego-tabs { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:24px; }
+  .nego-tab { padding:8px 18px; border-radius:30px; font-weight:700; font-size:0.85rem; text-decoration:none; border:1px solid #dee2e6; color:#555; background:#fff; transition:all 0.15s; }
+  .nego-tab:hover { border-color:#6f42c1; color:#6f42c1; }
+  .nego-tab.active { background:#6f42c1; color:#fff; border-color:#6f42c1; }
+  .nego-tab .cnt { font-weight:800; margin-left:4px; }
+
+  .nego-card { border:1px solid #e9ecef; border-radius:14px; padding:20px; margin-bottom:16px; background:#fff; box-shadow:0 2px 8px rgba(0,0,0,0.04); border-left:5px solid #adb5bd; }
+  .nego-card.s-pending   { border-left-color:#ffc107; }
+  .nego-card.s-countered { border-left-color:#0dcaf0; }
+  .nego-card.s-accepted  { border-left-color:#198754; }
+  .nego-card.s-paid      { border-left-color:#6f42c1; }
+  .nego-card.s-rejected  { border-left-color:#dc3545; }
+
+  .nego-head { display:flex; gap:16px; align-items:center; margin-bottom:14px; }
+  .nego-head img { width:64px; height:64px; border-radius:12px; object-fit:cover; }
+  .nego-head .pname { font-weight:800; font-size:1.05rem; }
+  .nego-head .pmeta { color:#888; font-size:0.82rem; }
+
+  .nego-prices { display:flex; gap:24px; flex-wrap:wrap; margin-bottom:14px; }
+  .pb .pl { color:#999; font-size:0.7rem; text-transform:uppercase; letter-spacing:0.5px; font-weight:700; }
+  .pb .pv { font-size:1.3rem; font-weight:800; }
+  .pb .pv.offer { color:#198754; }
+  .pb .pv.counter { color:#0dcaf0; }
+
+  .nego-msg { background:#f8f9fa; border-radius:10px; padding:10px 14px; font-size:0.86rem; margin-bottom:8px; }
+  .nego-msg .who { font-weight:800; font-size:0.7rem; text-transform:uppercase; color:#6f42c1; }
+
+  .nego-actions { display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-top:12px; padding-top:14px; border-top:1px solid #eee; }
+  .nego-actions input[type="number"] { width:140px; }
+  .nego-actions input[type="text"] { min-width:200px; flex:1; }
+  .status-pill { padding:3px 12px; border-radius:20px; font-size:0.72rem; font-weight:800; text-transform:uppercase; }
+  .pill-pending   { background:#fff3cd; color:#997404; }
+  .pill-countered { background:#cff4fc; color:#055160; }
+  .pill-accepted  { background:#d1e7dd; color:#0f5132; }
+  .pill-paid      { background:#e2d9f3; color:#432874; }
+  .pill-rejected  { background:#f8d7da; color:#842029; }
+  .wa-btn { background:#25D366; color:#fff !important; border:none; }
+  .wa-btn:hover { background:#1ebe5a; }
+</style>
+
+<h2 class="fw-bold mb-1">💬 Negotiations</h2>
+<p class="text-muted mb-4">Review customer offers and respond with accept, counter, or reject.</p>
+
+<!-- Tabs -->
+<div class="nego-tabs">
+  {% set tabs = [('all','All'),('pending','Pending'),('countered','Countered'),('accepted','Accepted'),('paid','Paid'),('rejected','Rejected')] %}
+  {% for key, label in tabs %}
+  <a href="{{ url_for('negotiate.admin_negotiations', status=key) }}"
+     class="nego-tab {{ 'active' if status_filter == key }}">
+    {{ label }}<span class="cnt">{{ counts[key] }}</span>
+  </a>
+  {% endfor %}
+</div>
+
+{% if offers %}
+  {% for o in offers %}
+  <div class="nego-card s-{{ o.status }}">
+    <div class="nego-head">
+      <img src="{{ url_for('static', filename='images/' + o.product.image_file) }}" alt="">
+      <div class="flex-grow-1">
+        <div class="pname">{{ o.product.name }}
+          <span class="status-pill pill-{{ o.status }}">{{ o.status }}</span>
+        </div>
+        <div class="pmeta">
+          👤 {{ o.user.username }} ({{ o.user.email }}){% if o.user.phone %} · 📞 {{ o.user.phone }}{% endif %}<br>
+          Size {{ o.size }} · Qty {{ o.quantity }} · {{ o.created_at.strftime('%d %b %Y, %I:%M %p') }}
+        </div>
+      </div>
+      <div class="text-end">
+        <div class="text-muted" style="font-size:0.72rem;">OFFER #{{ o.id }}</div>
+      </div>
+    </div>
+
+    <div class="nego-prices">
+      <div class="pb"><div class="pl">Listed price</div><div class="pv">₦{{ "{:,.0f}".format(o.product.price) }}</div></div>
+      <div class="pb"><div class="pl">Customer offer</div><div class="pv offer">₦{{ "{:,.0f}".format(o.offer_price) }}</div></div>
+      {% if o.admin_price %}
+      <div class="pb"><div class="pl">Your price</div><div class="pv counter">₦{{ "{:,.0f}".format(o.admin_price) }}</div></div>
+      {% endif %}
+      <div class="pb"><div class="pl">Offer total ({{ o.quantity }})</div><div class="pv">₦{{ "{:,.0f}".format(o.offer_price * o.quantity) }}</div></div>
+    </div>
+
+    {% if o.user_message %}
+    <div class="nego-msg"><div class="who">Customer</div>{{ o.user_message }}</div>
+    {% endif %}
+    {% if o.admin_message %}
+    <div class="nego-msg" style="background:#eef6ff;"><div class="who">You replied</div>{{ o.admin_message }}</div>
+    {% endif %}
+
+    {% if o.status in ['pending','countered'] %}
+    <form method="POST" action="{{ url_for('negotiate.admin_respond', nego_id=o.id) }}" class="nego-actions">
+      <input type="text" name="admin_message" class="form-control form-control-sm" placeholder="Optional message to customer...">
+      <input type="number" name="counter_price" class="form-control form-control-sm" placeholder="₦ Counter price" step="any" min="1">
+      <button type="submit" name="action" value="accept"  class="btn btn-success btn-sm">✅ Accept offer</button>
+      <button type="submit" name="action" value="counter" class="btn btn-info btn-sm text-white">💬 Send counter</button>
+      <button type="submit" name="action" value="reject"  class="btn btn-outline-danger btn-sm"
+              onclick="return confirm('Reject this offer?')">✕ Reject</button>
+      {% if wa_links.get(o.id) %}
+      <a href="{{ wa_links[o.id] }}" target="_blank" class="btn btn-sm wa-btn">💬 WhatsApp</a>
+      {% endif %}
+    </form>
+    {% elif o.status == 'accepted' %}
+      <div class="nego-actions"><span class="text-success fw-bold">✅ Deal agreed at ₦{{ "{:,.0f}".format(o.current_price()) }} each — awaiting customer payment.</span></div>
+    {% elif o.status == 'paid' %}
+      <div class="nego-actions"><span class="text-purple fw-bold" style="color:#6f42c1;">🎉 Paid — ₦{{ "{:,.0f}".format(o.total_amount()) }} total.</span></div>
+    {% elif o.status == 'rejected' %}
+      <div class="nego-actions"><span class="text-danger">Offer rejected.</span></div>
+    {% endif %}
+  </div>
+  {% endfor %}
+{% else %}
+  <div class="text-center text-muted py-5">
+    <div style="font-size:3rem;">💬</div>
+    <p class="mt-3">No negotiations in this category yet.</p>
+  </div>
+{% endif %}
+
+{% endblock %}

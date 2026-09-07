@@ -1,0 +1,153 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Nunito:wght@600;700;800;900&display=swap');
+
+.off-wrap { max-width: 900px; margin: 40px auto; padding: 0 16px; }
+.off-title { font-family:'Bebas Neue',sans-serif; font-size:2.8rem; letter-spacing:3px; color:#fff; margin-bottom:6px; }
+.off-title span { background:linear-gradient(135deg,#A855F7,#FF2D87); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+.off-sub { color:rgba(255,255,255,0.4); font-weight:700; font-size:0.9rem; margin-bottom:30px; }
+
+.off-card {
+  background:#0f0f20; border:1px solid rgba(255,255,255,0.07);
+  border-radius:20px; padding:22px; margin-bottom:16px;
+  display:flex; gap:18px; align-items:flex-start; position:relative; overflow:hidden;
+}
+.off-card::before { content:''; position:absolute; left:0; top:0; bottom:0; width:4px; background:var(--accent,#888); }
+.off-card.s-pending   { --accent:#FFD700; }
+.off-card.s-countered { --accent:#00E5FF; }
+.off-card.s-accepted  { --accent:#39FF14; }
+.off-card.s-paid      { --accent:#A855F7; }
+.off-card.s-rejected  { --accent:#FF2D87; }
+
+.off-img { width:90px; height:90px; border-radius:14px; object-fit:cover; background:#1a1a30; flex-shrink:0; }
+.off-body { flex:1; }
+.off-pname { font-weight:900; color:#fff; font-size:1.1rem; }
+.off-meta { color:rgba(255,255,255,0.4); font-weight:700; font-size:0.8rem; margin:3px 0 10px; }
+
+.off-status { display:inline-block; padding:4px 14px; border-radius:20px; font-size:0.7rem; font-weight:900; text-transform:uppercase; letter-spacing:1.5px; margin-bottom:10px; }
+.badge-pending   { background:rgba(255,215,0,0.15);  color:#FFD700; border:1px solid rgba(255,215,0,0.4); }
+.badge-countered { background:rgba(0,229,255,0.15);  color:#00E5FF; border:1px solid rgba(0,229,255,0.4); }
+.badge-accepted  { background:rgba(57,255,20,0.15);  color:#39FF14; border:1px solid rgba(57,255,20,0.4); }
+.badge-paid      { background:rgba(168,85,247,0.15); color:#C77DFF; border:1px solid rgba(168,85,247,0.4); }
+.badge-rejected  { background:rgba(255,45,135,0.15); color:#FF2D87; border:1px solid rgba(255,45,135,0.4); }
+
+.price-row { display:flex; gap:24px; flex-wrap:wrap; margin-bottom:12px; }
+.price-blk .pl { color:rgba(255,255,255,0.4); font-size:0.7rem; font-weight:800; text-transform:uppercase; letter-spacing:1px; }
+.price-blk .pv { font-family:'Bebas Neue',sans-serif; font-size:1.5rem; color:#fff; line-height:1.1; }
+.price-blk .pv.gold { background:linear-gradient(135deg,#FFD700,#FF6B35); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+.price-blk .pv.green { color:#39FF14; }
+.price-blk .pv.cyan { color:#00E5FF; }
+
+.msg-bubble { background:rgba(255,255,255,0.04); border-radius:12px; padding:10px 14px; margin-bottom:12px; font-size:0.85rem; }
+.msg-bubble .who { font-weight:900; font-size:0.72rem; text-transform:uppercase; letter-spacing:1px; margin-bottom:3px; }
+.msg-bubble .who.seller { color:#00E5FF; }
+.msg-bubble .who.you { color:#FF2D87; }
+.msg-bubble .txt { color:rgba(255,255,255,0.7); font-weight:600; line-height:1.4; }
+
+.off-actions { display:flex; gap:10px; flex-wrap:wrap; }
+.btn-pay-nego { background:linear-gradient(135deg,#FF6B00,#FFCC00); color:#000; font-weight:900; font-size:0.85rem; padding:11px 24px; border-radius:30px; border:none; text-decoration:none; cursor:pointer; box-shadow:0 4px 18px rgba(255,107,0,0.4); transition:all 0.2s; display:inline-block; }
+.btn-pay-nego:hover { transform:translateY(-2px); color:#000; }
+.btn-accept { background:linear-gradient(135deg,#39FF14,#00E5FF); color:#000; font-weight:900; font-size:0.85rem; padding:11px 24px; border-radius:30px; border:none; cursor:pointer; transition:all 0.2s; }
+.btn-accept:hover { transform:translateY(-2px); }
+.btn-wa { background:#25D366; color:#fff; font-weight:900; font-size:0.85rem; padding:11px 20px; border-radius:30px; border:none; text-decoration:none; cursor:pointer; transition:all 0.2s; display:inline-flex; align-items:center; gap:6px; }
+.btn-wa:hover { transform:translateY(-2px); color:#fff; background:#1ebe5a; }
+.btn-cancel { background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.15); color:rgba(255,255,255,0.55); font-weight:800; font-size:0.82rem; padding:11px 20px; border-radius:30px; cursor:pointer; transition:all 0.2s; }
+.btn-cancel:hover { background:rgba(255,45,135,0.15); color:#FF2D87; border-color:rgba(255,45,135,0.3); }
+.inline-form { display:inline; }
+
+.empty { text-align:center; padding:90px 20px; }
+.empty-icon { font-size:4.5rem; margin-bottom:18px; opacity:0.4; }
+.empty-t { font-family:'Bebas Neue',sans-serif; font-size:1.9rem; letter-spacing:2px; color:rgba(255,255,255,0.3); margin-bottom:18px; }
+.btn-shop { display:inline-block; background:linear-gradient(135deg,#FF2D87,#A855F7); color:#fff; font-weight:900; padding:14px 34px; border-radius:50px; text-decoration:none; box-shadow:0 6px 25px rgba(255,45,135,0.4); }
+.btn-shop:hover { color:#fff; }
+</style>
+
+<div class="off-wrap">
+  <div class="off-title">MY <span>OFFERS</span> 💬</div>
+  <div class="off-sub">Track your price negotiations with the seller</div>
+
+  {% if offers %}
+    {% for o in offers %}
+    <div class="off-card s-{{ o.status }}">
+      <img class="off-img" src="{{ url_for('static', filename='images/' + o.product.image_file) }}" alt="{{ o.product.name }}">
+      <div class="off-body">
+
+        {% if o.status == 'pending' %}
+          <span class="off-status badge-pending">⏳ Waiting for seller</span>
+        {% elif o.status == 'countered' %}
+          <span class="off-status badge-countered">💬 Seller replied</span>
+        {% elif o.status == 'accepted' %}
+          <span class="off-status badge-accepted">✅ Deal agreed</span>
+        {% elif o.status == 'paid' %}
+          <span class="off-status badge-paid">🎉 Paid</span>
+        {% elif o.status == 'rejected' %}
+          <span class="off-status badge-rejected">❌ Declined</span>
+        {% endif %}
+
+        <div class="off-pname">{{ o.product.name }}</div>
+        <div class="off-meta">{{ o.product.brand }} · Size {{ o.size }} · Qty {{ o.quantity }} · {{ o.created_at.strftime('%d %b %Y') }}</div>
+
+        <div class="price-row">
+          <div class="price-blk">
+            <div class="pl">Listed</div>
+            <div class="pv">₦{{ "{:,.0f}".format(o.product.price) }}</div>
+          </div>
+          <div class="price-blk">
+            <div class="pl">Your offer</div>
+            <div class="pv">₦{{ "{:,.0f}".format(o.offer_price) }}</div>
+          </div>
+          {% if o.admin_price %}
+          <div class="price-blk">
+            <div class="pl">Seller price</div>
+            <div class="pv cyan">₦{{ "{:,.0f}".format(o.admin_price) }}</div>
+          </div>
+          {% endif %}
+          {% if o.status in ['accepted','paid'] %}
+          <div class="price-blk">
+            <div class="pl">Total to pay</div>
+            <div class="pv green">₦{{ "{:,.0f}".format(o.total_amount()) }}</div>
+          </div>
+          {% endif %}
+        </div>
+
+        {% if o.user_message %}
+        <div class="msg-bubble"><div class="who you">You said</div><div class="txt">{{ o.user_message }}</div></div>
+        {% endif %}
+        {% if o.admin_message %}
+        <div class="msg-bubble"><div class="who seller">Seller replied</div><div class="txt">{{ o.admin_message }}</div></div>
+        {% endif %}
+
+        <div class="off-actions">
+          {% if o.status == 'accepted' %}
+            <a href="{{ url_for('negotiate.nego_checkout', nego_id=o.id) }}" class="btn-pay-nego">💳 Pay ₦{{ "{:,.0f}".format(o.total_amount()) }} →</a>
+          {% elif o.status == 'countered' %}
+            <form class="inline-form" method="POST" action="{{ url_for('negotiate.accept_counter', nego_id=o.id) }}">
+              <button type="submit" class="btn-accept">✅ Accept ₦{{ "{:,.0f}".format(o.admin_price) }}</button>
+            </form>
+            <a href="{{ wa_links[o.id] }}" target="_blank" class="btn-wa">💬 WhatsApp seller</a>
+          {% elif o.status == 'pending' %}
+            <a href="{{ wa_links[o.id] }}" target="_blank" class="btn-wa">💬 WhatsApp seller</a>
+          {% endif %}
+
+          {% if o.status in ['pending','countered','rejected'] %}
+            <form class="inline-form" method="POST" action="{{ url_for('negotiate.cancel_offer', nego_id=o.id) }}"
+                  onsubmit="return confirm('Withdraw this offer?')">
+              <button type="submit" class="btn-cancel">Withdraw</button>
+            </form>
+          {% endif %}
+        </div>
+
+      </div>
+    </div>
+    {% endfor %}
+  {% else %}
+    <div class="empty">
+      <div class="empty-icon">💬</div>
+      <div class="empty-t">No offers yet</div>
+      <a href="{{ url_for('shop.home') }}" class="btn-shop">Browse Shoes & Negotiate →</a>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

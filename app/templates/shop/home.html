@@ -1,0 +1,944 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Black+Han+Sans&family=Nunito:wght@400;600;700;800;900&display=swap');
+
+:root {
+  --pink: #FF2D87;
+  --orange: #FF6B35;
+  --yellow: #FFD700;
+  --cyan: #00E5FF;
+  --purple: #A855F7;
+  --green: #39FF14;
+  --blue: #3B82F6;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: #060610; font-family: 'Nunito', sans-serif; overflow-x: hidden; }
+
+/* ── PARTICLES CANVAS ── */
+#particles-canvas {
+  position: fixed; top: 0; left: 0;
+  width: 100%; height: 100%;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.4;
+}
+
+/* ── TICKER ── */
+.ticker-wrap {
+  position: relative; z-index: 10;
+  background: linear-gradient(90deg, #FF2D87, #FF6B35, #FFD700, #00E5FF, #A855F7, #FF2D87);
+  background-size: 300% 100%;
+  animation: gradshift 4s linear infinite;
+  padding: 10px 0; overflow: hidden;
+}
+@keyframes gradshift { 0%{background-position:0%} 100%{background-position:300%} }
+.ticker {
+  display: flex; gap: 60px;
+  animation: ticker 20s linear infinite;
+  white-space: nowrap;
+}
+.ticker span { font-weight: 900; font-size: 0.9rem; color: #000; letter-spacing: 2px; text-transform: uppercase; }
+@keyframes ticker { from{transform:translateX(0)} to{transform:translateX(-50%)} }
+
+/* ── HERO ── */
+.hero {
+  position: relative; z-index: 1;
+  min-height: 620px;
+  margin: 0 -12px 0;
+  overflow: hidden;
+  display: flex; align-items: center;
+  background: #060610;
+}
+.hero-aurora {
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse 80% 60% at 15% 50%, rgba(255,45,135,0.5) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 80% at 85% 30%, rgba(168,85,247,0.45) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 50% at 60% 80%, rgba(0,229,255,0.35) 0%, transparent 60%),
+    radial-gradient(ellipse 40% 60% at 40% 10%, rgba(255,107,53,0.3) 0%, transparent 60%);
+  animation: aurora 8s ease-in-out infinite alternate;
+}
+@keyframes aurora {
+  0% { opacity: 0.8; transform: scale(1); }
+  100% { opacity: 1; transform: scale(1.05) rotate(1deg); }
+}
+.hero-mesh {
+  position: absolute; inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+  background-size: 50px 50px;
+}
+.hero-noise {
+  position: absolute; inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  background-size: 200px;
+  opacity: 0.5;
+}
+
+.hero-content {
+  position: relative; z-index: 5;
+  padding: 70px 50px;
+  max-width: 640px;
+}
+.hero-badge {
+  display: inline-flex; align-items: center; gap: 10px;
+  background: rgba(255,45,135,0.15);
+  border: 1px solid rgba(255,45,135,0.6);
+  border-radius: 50px;
+  padding: 7px 20px;
+  margin-bottom: 24px;
+  animation: pulse-badge 2s ease-in-out infinite;
+}
+@keyframes pulse-badge {
+  0%,100%{ box-shadow: 0 0 0 0 rgba(255,45,135,0.4); }
+  50%{ box-shadow: 0 0 0 8px rgba(255,45,135,0); }
+}
+.hero-badge .dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--pink);
+  animation: blink 1.2s infinite;
+}
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
+.hero-badge span {
+  font-size: 0.78rem; font-weight: 800;
+  color: var(--pink); text-transform: uppercase; letter-spacing: 2px;
+}
+
+.hero-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(4rem, 9vw, 7rem);
+  line-height: 0.9;
+  color: #fff;
+  letter-spacing: 3px;
+  margin-bottom: 16px;
+}
+.hero-title .line1 { display: block; animation: slide-in-left 0.7s ease both; }
+.hero-title .line2 {
+  display: block;
+  background: linear-gradient(135deg, #FF2D87, #FF6B35, #FFD700, #FF2D87);
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: slide-in-left 0.7s 0.1s ease both, shimmer-text 3s linear infinite;
+}
+.hero-title .line3 { display: block; animation: slide-in-left 0.7s 0.2s ease both; }
+@keyframes slide-in-left { from{opacity:0;transform:translateX(-40px)} to{opacity:1;transform:translateX(0)} }
+@keyframes shimmer-text { 0%{background-position:0%} 100%{background-position:200%} }
+
+.hero-sub {
+  color: rgba(255,255,255,0.65);
+  font-size: 1.1rem; font-weight: 600;
+  line-height: 1.6; margin-bottom: 36px;
+  animation: fade-up 0.7s 0.3s ease both;
+}
+@keyframes fade-up { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+
+.hero-btns {
+  display: flex; gap: 14px; flex-wrap: wrap;
+  animation: fade-up 0.7s 0.4s ease both;
+}
+.btn-main {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: linear-gradient(135deg, #FF2D87, #A855F7);
+  color: #fff !important; font-weight: 900; font-size: 1rem;
+  padding: 15px 38px; border-radius: 50px;
+  text-decoration: none; transition: all 0.25s;
+  box-shadow: 0 0 40px rgba(255,45,135,0.5);
+  letter-spacing: 0.5px;
+}
+.btn-main:hover { transform: translateY(-4px) scale(1.02); box-shadow: 0 0 70px rgba(255,45,135,0.7); }
+.btn-sec {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: rgba(255,255,255,0.08);
+  border: 1.5px solid rgba(255,255,255,0.25);
+  color: #fff !important; font-weight: 800; font-size: 1rem;
+  padding: 15px 38px; border-radius: 50px;
+  text-decoration: none; transition: all 0.25s;
+}
+.btn-sec:hover { background: rgba(255,255,255,0.15); transform: translateY(-4px); }
+
+/* Hero floating elements */
+.hero-visual {
+  position: absolute; right: 0; top: 0; bottom: 0;
+  width: 50%;
+  display: flex; align-items: center; justify-content: center;
+}
+.big-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(60px);
+  animation: float-orb 5s ease-in-out infinite;
+}
+.orb-A { width: 350px; height: 350px; background: radial-gradient(circle, rgba(255,45,135,0.7), transparent); right: 80px; top: 50px; animation-delay: 0s; }
+.orb-B { width: 250px; height: 250px; background: radial-gradient(circle, rgba(0,229,255,0.6), transparent); right: 200px; bottom: 80px; animation-delay: -2s; }
+.orb-C { width: 180px; height: 180px; background: radial-gradient(circle, rgba(255,215,0,0.5), transparent); right: 50px; bottom: 100px; animation-delay: -4s; }
+.orb-D { width: 120px; height: 120px; background: radial-gradient(circle, rgba(168,85,247,0.7), transparent); right: 300px; top: 80px; animation-delay: -1s; }
+@keyframes float-orb { 0%,100%{transform:translateY(0) scale(1)} 50%{transform:translateY(-20px) scale(1.05)} }
+
+
+
+/* Stats */
+.hero-stats {
+  position: absolute; bottom: 40px; left: 50px;
+  display: flex; gap: 30px; z-index: 5;
+  animation: fade-up 0.7s 0.5s ease both;
+}
+.stat { text-align: center; }
+.stat-num {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 2.2rem; line-height: 1;
+  background: linear-gradient(135deg, #00E5FF, #A855F7);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+.stat-lbl { font-size: 0.7rem; color: rgba(255,255,255,0.45); font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
+.stat-divider { width: 1px; background: rgba(255,255,255,0.1); }
+
+/* ── CATEGORY CARDS ── */
+.section-wrap { position: relative; z-index: 2; padding: 0 0 20px; }
+
+.section-head {
+  display: flex; align-items: baseline; gap: 16px;
+  margin-bottom: 24px; padding-top: 50px;
+}
+.section-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 2.5rem; color: #fff; letter-spacing: 3px;
+}
+.section-title .hl {
+  background: linear-gradient(90deg, #FF2D87, #FF6B35);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+.section-tag {
+  font-size: 0.75rem; font-weight: 800; color: rgba(255,255,255,0.3);
+  text-transform: uppercase; letter-spacing: 2px;
+}
+
+.cat-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin-bottom: 50px;
+}
+.cat-card {
+  position: relative; border-radius: 20px; overflow: hidden;
+  height: 140px; cursor: pointer; text-decoration: none;
+  transition: transform 0.3s, box-shadow 0.3s;
+  display: flex; align-items: flex-end;
+}
+.cat-card:hover { transform: translateY(-6px) scale(1.02); }
+.cat-card::before {
+  content: ''; position: absolute; inset: 0;
+  background: var(--bg);
+  transition: opacity 0.3s;
+}
+.cat-card::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 60%);
+}
+.cat-men { --bg: linear-gradient(135deg, #0047AB, #00E5FF); box-shadow: 0 8px 30px rgba(0,229,255,0.25); }
+.cat-men:hover { box-shadow: 0 16px 50px rgba(0,229,255,0.4); }
+.cat-women { --bg: linear-gradient(135deg, #C2185B, #FF2D87); box-shadow: 0 8px 30px rgba(255,45,135,0.25); }
+.cat-women:hover { box-shadow: 0 16px 50px rgba(255,45,135,0.45); }
+.cat-kids { --bg: linear-gradient(135deg, #F57F17, #FFD700); box-shadow: 0 8px 30px rgba(255,215,0,0.2); }
+.cat-kids:hover { box-shadow: 0 16px 50px rgba(255,215,0,0.4); }
+.cat-snk { --bg: linear-gradient(135deg, #4527A0, #A855F7); box-shadow: 0 8px 30px rgba(168,85,247,0.25); }
+.cat-snk:hover { box-shadow: 0 16px 50px rgba(168,85,247,0.45); }
+
+.cat-label {
+  position: relative; z-index: 2;
+  padding: 16px 18px;
+  width: 100%;
+}
+.cat-emoji { font-size: 2rem; display: block; margin-bottom: 4px; }
+.cat-name { font-weight: 900; font-size: 1rem; color: #fff; letter-spacing: 1px; }
+.cat-count { font-size: 0.72rem; color: rgba(255,255,255,0.6); font-weight: 700; }
+
+/* floating orbs on cat cards */
+.cat-card .cat-orb {
+  position: absolute; border-radius: 50%; filter: blur(30px); opacity: 0.5;
+  width: 80px; height: 80px; top: 10px; right: 20px;
+  background: rgba(255,255,255,0.3);
+  pointer-events: none;
+}
+
+/* ── FEATURES ── */
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin-bottom: 50px;
+}
+.feat {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 20px; padding: 24px 20px;
+  text-align: center;
+  transition: all 0.3s;
+  position: relative; overflow: hidden;
+}
+.feat::before {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(135deg, var(--fc, #FF2D87), transparent);
+  opacity: 0; transition: opacity 0.3s;
+  border-radius: 20px;
+}
+.feat:hover { transform: translateY(-5px); border-color: var(--fc, #FF2D87); }
+.feat:hover::before { opacity: 0.08; }
+.feat-icon {
+  width: 56px; height: 56px; border-radius: 16px;
+  background: linear-gradient(135deg, var(--fc, #FF2D87), transparent);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.6rem; margin: 0 auto 14px;
+  box-shadow: 0 4px 20px color-mix(in srgb, var(--fc, #FF2D87) 40%, transparent);
+}
+.feat h4 { color: #fff; font-size: 0.95rem; font-weight: 800; margin-bottom: 4px; }
+.feat p { color: rgba(255,255,255,0.45); font-size: 0.78rem; font-weight: 600; }
+
+/* ── FILTER BAR ── */
+.filter-bar {
+  display: flex; gap: 10px; flex-wrap: wrap;
+  margin-bottom: 30px; align-items: center;
+}
+.filter-pill {
+  padding: 9px 22px; border-radius: 50px;
+  font-weight: 800; font-size: 0.85rem;
+  text-decoration: none; border: 2px solid transparent;
+  transition: all 0.2s; letter-spacing: 0.5px;
+  cursor: pointer;
+}
+.fp-all { background: linear-gradient(135deg, #FF2D87, #A855F7); color: #fff; }
+.fp-men { border-color: #00E5FF; color: #00E5FF; }
+.fp-men:hover, .fp-men.active { background: #00E5FF; color: #000 !important; }
+.fp-women { border-color: #FF2D87; color: #FF2D87; }
+.fp-women:hover, .fp-women.active { background: #FF2D87; color: #fff !important; }
+.fp-kids { border-color: #FFD700; color: #FFD700; }
+.fp-kids:hover, .fp-kids.active { background: #FFD700; color: #000 !important; }
+.fp-uni { border-color: #A855F7; color: #A855F7; }
+.fp-uni:hover, .fp-uni.active { background: #A855F7; color: #fff !important; }
+
+/* ── PRODUCT GRID ── */
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 22px;
+  margin-bottom: 60px;
+}
+.p-card {
+  background: #0f0f20;
+  border-radius: 22px; overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.06);
+  transition: all 0.3s;
+  position: relative;
+  group: card;
+}
+.p-card::after {
+  content: ''; position: absolute; inset: 0; border-radius: 22px;
+  background: linear-gradient(135deg, var(--ca, #FF2D87), transparent);
+  opacity: 0; transition: opacity 0.3s; pointer-events: none;
+}
+.p-card:hover {
+  transform: translateY(-10px);
+  border-color: var(--ca, #FF2D87);
+  box-shadow:
+    0 25px 60px rgba(0,0,0,0.5),
+    0 0 0 1px var(--ca, #FF2D87),
+    0 0 40px color-mix(in srgb, var(--ca, #FF2D87) 25%, transparent);
+}
+.p-card:hover::after { opacity: 0.04; }
+
+.p-img-wrap {
+  height: 210px; overflow: hidden; position: relative;
+  background: linear-gradient(135deg, #1a1a30, #111125);
+}
+.p-img-wrap::after {
+  content: ''; position: absolute; bottom: 0; left: 0; right: 0;
+  height: 70px;
+  background: linear-gradient(to top, #0f0f20, transparent);
+}
+.p-img-wrap img {
+  width: 100%; height: 100%; object-fit: cover;
+  transition: transform 0.5s; cursor: zoom-in;
+}
+.p-card:hover .p-img-wrap img { transform: scale(1.1); }
+
+.p-ribbon {
+  position: absolute; top: 14px; left: 14px;
+  padding: 4px 12px; border-radius: 20px;
+  font-size: 0.68rem; font-weight: 900;
+  text-transform: uppercase; letter-spacing: 1.5px; z-index: 3;
+}
+.ribbon-men { background: rgba(0,229,255,0.2); color: #00E5FF; border: 1px solid rgba(0,229,255,0.5); }
+.ribbon-women { background: rgba(255,45,135,0.2); color: #FF2D87; border: 1px solid rgba(255,45,135,0.5); }
+.ribbon-kids { background: rgba(255,215,0,0.2); color: #FFD700; border: 1px solid rgba(255,215,0,0.5); }
+.ribbon-uni { background: rgba(168,85,247,0.2); color: #A855F7; border: 1px solid rgba(168,85,247,0.5); }
+
+.stock-led {
+  position: absolute; top: 14px; right: 14px;
+  width: 10px; height: 10px; border-radius: 50%; z-index: 3;
+}
+.stock-led.on { background: #39FF14; box-shadow: 0 0 10px #39FF14, 0 0 20px rgba(57,255,20,0.5); animation: led-blink 2s infinite; }
+.stock-led.off { background: #ff4444; }
+@keyframes led-blink { 0%,100%{opacity:1} 50%{opacity:0.5} }
+
+.p-body { padding: 18px 20px 20px; }
+.p-brand { font-size: 0.7rem; font-weight: 800; text-transform: uppercase; letter-spacing: 2px; color: rgba(255,255,255,0.35); margin-bottom: 4px; }
+.p-name { font-size: 1rem; font-weight: 900; color: #fff; margin-bottom: 8px; line-height: 1.3; }
+
+.p-sizes-row {
+  display: flex; gap: 5px; flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+.p-size-chip {
+  font-size: 0.65rem; font-weight: 800;
+  color: rgba(255,255,255,0.4);
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 6px; padding: 2px 7px;
+}
+
+.p-bottom { display: flex; align-items: center; justify-content: space-between; }
+.p-price {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.8rem; line-height: 1;
+  background: linear-gradient(135deg, #FFD700, #FF6B35);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+.p-price small { font-size: 0.9rem; -webkit-text-fill-color: transparent; background-clip: text; }
+
+.btn-card {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: linear-gradient(135deg, #FF2D87, #A855F7);
+  color: #fff !important; font-weight: 900; font-size: 0.8rem;
+  padding: 10px 20px; border-radius: 30px;
+  text-decoration: none; transition: all 0.25s;
+  box-shadow: 0 4px 15px rgba(255,45,135,0.4);
+  letter-spacing: 0.5px; white-space: nowrap;
+}
+.btn-card:hover { transform: scale(1.06); box-shadow: 0 6px 30px rgba(255,45,135,0.6); }
+
+/* Like btn */
+.like-btn {
+  position: absolute; top: 45px; right: 14px;
+  width: 34px; height: 34px; border-radius: 50%;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.15);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; z-index: 3; transition: all 0.2s;
+  font-size: 0.9rem;
+}
+.like-btn:hover { background: rgba(255,45,135,0.3); border-color: #FF2D87; transform: scale(1.15); }
+
+/* ── MARQUEE BANNER ── */
+.marquee-banner {
+  background: linear-gradient(135deg, #14142a, #1a1a35);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 20px;
+  padding: 28px 0;
+  margin-bottom: 50px;
+  overflow: hidden;
+  position: relative;
+}
+.marquee-track {
+  display: flex; gap: 40px;
+  animation: marquee 15s linear infinite;
+  white-space: nowrap;
+}
+.marquee-item {
+  display: flex; align-items: center; gap: 12px;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.5rem; letter-spacing: 3px;
+  color: rgba(255,255,255,0.1);
+  flex-shrink: 0;
+}
+.marquee-item.lit { color: #fff; }
+.marquee-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--pink); flex-shrink: 0;
+}
+@keyframes marquee { from{transform:translateX(0)} to{transform:translateX(-50%)} }
+
+/* ── PROMO BANNER ── */
+.promo-duo {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 16px; margin-bottom: 50px;
+}
+.promo-card {
+  border-radius: 22px; padding: 36px 32px;
+  position: relative; overflow: hidden;
+  min-height: 200px; display: flex; flex-direction: column; justify-content: flex-end;
+}
+.promo-1 { background: linear-gradient(135deg, #1a0a2e, #3b1278, #7c3aed); }
+.promo-2 { background: linear-gradient(135deg, #1a0010, #7c0040, #FF2D87); }
+.promo-card h3 {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 2.2rem; color: #fff; letter-spacing: 3px; margin-bottom: 6px;
+  position: relative; z-index: 2;
+}
+.promo-card p { color: rgba(255,255,255,0.7); font-weight: 700; font-size: 0.9rem; position: relative; z-index: 2; margin-bottom: 16px; }
+.promo-card .promo-orb {
+  position: absolute; border-radius: 50%; filter: blur(50px);
+  width: 200px; height: 200px; top: -40px; right: -30px;
+  opacity: 0.5;
+}
+.promo-1 .promo-orb { background: #a855f7; }
+.promo-2 .promo-orb { background: #FF2D87; }
+.promo-tag {
+  position: absolute; top: 20px; right: 20px;
+  background: rgba(255,255,255,0.15);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 10px; padding: 6px 14px;
+  font-weight: 900; font-size: 0.85rem; color: #fff;
+}
+.btn-promo {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: rgba(255,255,255,0.15);
+  border: 1px solid rgba(255,255,255,0.3);
+  color: #fff !important; font-weight: 800; font-size: 0.88rem;
+  padding: 10px 22px; border-radius: 30px;
+  text-decoration: none; transition: all 0.25s; width: fit-content;
+  position: relative; z-index: 2;
+}
+.btn-promo:hover { background: rgba(255,255,255,0.25); transform: translateY(-2px); }
+
+/* ── CTA BANNER ── */
+.cta-banner {
+  border-radius: 26px; padding: 60px 50px;
+  text-align: center; position: relative; overflow: hidden;
+  margin-bottom: 50px;
+  background: linear-gradient(135deg, #FF2D87 0%, #A855F7 40%, #00E5FF 100%);
+}
+.cta-banner::before {
+  content: ''; position: absolute; inset: 0;
+  background: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23fff' fill-opacity='0.07'%3E%3Ccircle cx='20' cy='20' r='3'/%3E%3C/g%3E%3C/svg%3E");
+}
+.cta-banner .cta-orb1 { position: absolute; border-radius: 50%; filter: blur(60px); width: 300px; height: 300px; background: rgba(255,255,255,0.2); top: -100px; left: -50px; pointer-events: none; }
+.cta-banner .cta-orb2 { position: absolute; border-radius: 50%; filter: blur(60px); width: 200px; height: 200px; background: rgba(0,0,0,0.2); bottom: -50px; right: 100px; pointer-events: none; }
+.cta-banner h2 {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(2.5rem, 5vw, 4rem);
+  color: #fff; letter-spacing: 4px; position: relative; z-index: 2;
+  margin-bottom: 10px;
+}
+.cta-banner p { color: rgba(255,255,255,0.85); font-size: 1.1rem; font-weight: 700; margin-bottom: 28px; position: relative; z-index: 2; }
+.btn-cta {
+  display: inline-flex; align-items: center; gap: 10px;
+  background: #fff; color: #FF2D87 !important;
+  font-weight: 900; font-size: 1.05rem;
+  padding: 16px 46px; border-radius: 50px;
+  text-decoration: none; transition: all 0.25s;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.25);
+  position: relative; z-index: 2;
+}
+.btn-cta:hover { transform: scale(1.05) translateY(-3px); box-shadow: 0 12px 60px rgba(0,0,0,0.3); }
+
+/* ── LIGHTBOX ── */
+#lb {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.94); z-index: 9999;
+  justify-content: center; align-items: center; flex-direction: column;
+  backdrop-filter: blur(12px);
+}
+#lb.open { display: flex; }
+#lb img { max-width: 80%; max-height: 65vh; border-radius: 20px; object-fit: contain; animation: lb-in 0.3s ease; }
+@keyframes lb-in { from{opacity:0;transform:scale(0.9)} to{opacity:1;transform:scale(1)} }
+.lb-x {
+  position: absolute; top: 24px; right: 30px;
+  background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 50%; width: 46px; height: 46px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; color: #fff; font-size: 1.2rem; transition: all 0.2s;
+}
+.lb-x:hover { background: rgba(255,45,135,0.5); }
+.lb-info { text-align: center; margin-top: 20px; }
+.lb-info h4 { color: #fff; font-family: 'Bebas Neue', sans-serif; font-size: 1.8rem; letter-spacing: 2px; margin: 0; }
+.lb-info p { color: rgba(255,255,255,0.45); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 2px; margin: 4px 0 0; }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 900px) {
+  .cat-grid { grid-template-columns: repeat(2, 1fr); }
+  .features-grid { grid-template-columns: repeat(2, 1fr); }
+  .promo-duo { grid-template-columns: 1fr; }
+}
+@media (max-width: 768px) {
+  .hero-visual { display: none; }
+  .hero-content { padding: 50px 24px; }
+  .hero-title { font-size: 3.5rem; }
+  .hero-stats { left: 24px; bottom: 24px; }
+}
+@media (max-width: 520px) {
+  .cat-grid { grid-template-columns: repeat(2, 1fr); }
+  .features-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* ── SCROLL REVEAL ── */
+.reveal { opacity: 0; transform: translateY(30px); transition: opacity 0.6s ease, transform 0.6s ease; }
+.reveal.visible { opacity: 1; transform: translateY(0); }
+</style>
+
+<canvas id="particles-canvas"></canvas>
+
+<!-- Ticker -->
+<div class="ticker-wrap">
+  <div class="ticker">
+    {% for _ in range(2) %}
+    <span>🔥 New Arrivals</span>
+    <span>✨ Free Shipping Over $150</span>
+    <span>👟 Premium Sneakers</span>
+    <span>💎 Luxury Footwear</span>
+    <span>🎯 Exclusive Drops</span>
+    <span>⚡ Limited Editions</span>
+    <span>🌟 M World Luxury</span>
+    <span>🏆 Authentic Only</span>
+    {% endfor %}
+  </div>
+</div>
+
+<!-- Hero -->
+<div class="hero">
+  <div class="hero-aurora"></div>
+  <div class="hero-mesh"></div>
+  <div class="hero-noise"></div>
+
+  <div class="hero-content">
+    <div class="hero-badge">
+      <div class="dot"></div>
+      <span>New Collection 2026</span>
+    </div>
+    <h1 class="hero-title">
+      <span class="line1">STEP INTO</span>
+      <span class="line2">LUXURY</span>
+      <span class="line3">STYLE</span>
+    </h1>
+    <p class="hero-sub">
+      Exclusive sneakers & designer footwear.<br>
+      Walk in style — live your best life.
+    </p>
+    <div class="hero-btns">
+      <a href="{{ url_for('shop.home') }}" class="btn-main">Shop Now →</a>
+      {% if not current_user.is_authenticated %}
+      <a href="{{ url_for('auth.register') }}" class="btn-sec">🎁 Join the Club</a>
+      {% else %}
+      <a href="{{ url_for('cart.view_cart') }}" class="btn-sec">🛒 My Cart</a>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="hero-visual">
+    <div class="big-orb orb-A"></div>
+    <div class="big-orb orb-B"></div>
+    <div class="big-orb orb-C"></div>
+    <div class="big-orb orb-D"></div>
+
+  </div>
+
+  <div class="hero-stats">
+    <div class="stat"><div class="stat-num">500+</div><div class="stat-lbl">Styles</div></div>
+    <div class="stat-divider"></div>
+    <div class="stat"><div class="stat-num">50K+</div><div class="stat-lbl">Customers</div></div>
+    <div class="stat-divider"></div>
+    <div class="stat"><div class="stat-num">100%</div><div class="stat-lbl">Authentic</div></div>
+  </div>
+</div>
+
+<!-- Section content -->
+<div class="section-wrap">
+
+  <!-- Category Cards -->
+  <div class="section-head reveal">
+    <div class="section-title">Shop by <span class="hl">Category</span></div>
+    <div class="section-tag">/ Discover your style</div>
+  </div>
+  <div class="cat-grid reveal">
+    <a href="{{ url_for('shop.home', category='Men') }}" class="cat-card cat-men">
+      <div class="cat-orb"></div>
+      <div class="cat-label">
+        <span class="cat-emoji">👟</span>
+        <div class="cat-name">MEN'S</div>
+        <div class="cat-count">Shop the collection →</div>
+      </div>
+    </a>
+    <a href="{{ url_for('shop.home', category='Women') }}" class="cat-card cat-women">
+      <div class="cat-orb"></div>
+      <div class="cat-label">
+        <span class="cat-emoji">👠</span>
+        <div class="cat-name">WOMEN'S</div>
+        <div class="cat-count">Shop the collection →</div>
+      </div>
+    </a>
+    <a href="{{ url_for('shop.home', category='Kids') }}" class="cat-card cat-kids">
+      <div class="cat-orb"></div>
+      <div class="cat-label">
+        <span class="cat-emoji">🥿</span>
+        <div class="cat-name">KIDS</div>
+        <div class="cat-count">Shop the collection →</div>
+      </div>
+    </a>
+    <a href="{{ url_for('shop.home', category='Unisex/Sneakers') }}" class="cat-card cat-snk">
+      <div class="cat-orb"></div>
+      <div class="cat-label">
+        <span class="cat-emoji">🔥</span>
+        <div class="cat-name">SNEAKERS</div>
+        <div class="cat-count">Shop the collection →</div>
+      </div>
+    </a>
+  </div>
+
+  <!-- Features -->
+  <div class="features-grid reveal">
+    <div class="feat" style="--fc:#00E5FF">
+      <div class="feat-icon">🚚</div>
+      <h4>Free Shipping</h4>
+      <p>On orders over $150</p>
+    </div>
+    <div class="feat" style="--fc:#39FF14">
+      <div class="feat-icon">🔒</div>
+      <h4>Secure Payment</h4>
+      <p>100% protected checkout</p>
+    </div>
+    <div class="feat" style="--fc:#FFD700">
+      <div class="feat-icon">↩️</div>
+      <h4>Easy Returns</h4>
+      <p>30-day hassle-free</p>
+    </div>
+    <div class="feat" style="--fc:#FF2D87">
+      <div class="feat-icon">✅</div>
+      <h4>Guaranteed Authentic</h4>
+      <p>100% genuine products</p>
+    </div>
+  </div>
+
+  <!-- Promo Duo -->
+  <div class="promo-duo reveal">
+    <div class="promo-card promo-1">
+      <div class="promo-orb"></div>
+      <div class="promo-tag">Limited Time</div>
+      <h3>NEW SEASON<br>DROPS</h3>
+      <p>Exclusive styles you won't find anywhere else</p>
+      <a href="{{ url_for('shop.home') }}" class="btn-promo">Explore Now →</a>
+    </div>
+    <div class="promo-card promo-2">
+      <div class="promo-orb"></div>
+      <div class="promo-tag">Members Only</div>
+      <h3>LUXURY<br>COLLECTION</h3>
+      <p>Premium footwear for the style-conscious</p>
+      <a href="{{ url_for('auth.register') }}" class="btn-promo">Join Free →</a>
+    </div>
+  </div>
+
+  <!-- Marquee -->
+  <div class="marquee-banner reveal">
+    <div class="marquee-track">
+      {% for _ in range(2) %}
+      <span class="marquee-item"><span class="marquee-dot"></span>NEW ARRIVALS</span>
+      <span class="marquee-item lit"><span class="marquee-dot"></span>LUXURY STYLE</span>
+      <span class="marquee-item"><span class="marquee-dot"></span>FREE SHIPPING</span>
+      <span class="marquee-item lit"><span class="marquee-dot"></span>AUTHENTIC ONLY</span>
+      <span class="marquee-item"><span class="marquee-dot"></span>PREMIUM QUALITY</span>
+      <span class="marquee-item lit"><span class="marquee-dot"></span>EXCLUSIVE DROPS</span>
+      <span class="marquee-item"><span class="marquee-dot"></span>M WORLD LUXURY</span>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Products -->
+  <div class="section-head reveal">
+    <div class="section-title">Our <span class="hl">Collection</span></div>
+    <div class="section-tag">/ {{ products|length }} products</div>
+  </div>
+
+  <!-- Filter -->
+  <div class="filter-bar reveal">
+    <a href="{{ url_for('shop.home') }}" class="filter-pill fp-all">✦ All Styles</a>
+    <a href="{{ url_for('shop.home', category='Men') }}" class="filter-pill fp-men">Men's</a>
+    <a href="{{ url_for('shop.home', category='Women') }}" class="filter-pill fp-women">Women's</a>
+    <a href="{{ url_for('shop.home', category='Kids') }}" class="filter-pill fp-kids">Kids</a>
+    <a href="{{ url_for('shop.home', category='Unisex/Sneakers') }}" class="filter-pill fp-uni">Unisex / Sneakers</a>
+  </div>
+
+  {% if products %}
+  <div class="product-grid">
+    {% set colors = ['#FF2D87','#00E5FF','#A855F7','#FFD700','#FF6B35','#39FF14','#3B82F6','#F59E0B'] %}
+    {% set ribbon_map = {'Men': 'ribbon-men', 'Women': 'ribbon-women', 'Kids': 'ribbon-kids'} %}
+    {% for product in products %}
+    {% set ca = colors[loop.index0 % colors|length] %}
+    <div class="p-card reveal" style="--ca: {{ ca }}; animation-delay: {{ loop.index0 * 0.05 }}s">
+
+      <div class="p-img-wrap">
+        <span class="p-ribbon {{ ribbon_map.get(product.category, 'ribbon-uni') }}">{{ product.category }}</span>
+        <span class="stock-led {{ 'on' if product.stock > 0 else 'off' }}" title="{{ 'In Stock' if product.stock > 0 else 'Out of Stock' }}"></span>
+        <div class="like-btn" onclick="toggleLike(this)" title="Wishlist">🤍</div>
+        <img src="{{ url_for('static', filename='images/' + product.image_file) }}"
+             alt="{{ product.name }}"
+             onclick="openLB(this.src,'{{ product.name }}','{{ product.brand }}')"
+             loading="lazy">
+      </div>
+
+      <div class="p-body">
+        <div class="p-brand">{{ product.brand }}</div>
+        <div class="p-name">{{ product.name }}</div>
+        <div class="p-sizes-row">
+          {% for size in product.get_sizes()[:5] %}
+          <span class="p-size-chip">{{ size }}</span>
+          {% endfor %}
+          {% if product.get_sizes()|length > 5 %}
+          <span class="p-size-chip">+{{ product.get_sizes()|length - 5 }}</span>
+          {% endif %}
+        </div>
+        <div class="p-bottom">
+          <div class="p-price"><small>$</small>{{ "%.0f"|format(product.price) }}</div>
+          <a href="{{ url_for('shop.product_detail', product_id=product.id) }}" class="btn-card">View →</a>
+        </div>
+      </div>
+
+    </div>
+    {% endfor %}
+  </div>
+
+  {% else %}
+  <div style="text-align:center; padding: 100px 20px; color: rgba(255,255,255,0.3);">
+    <div style="font-size: 4rem; margin-bottom: 20px; filter: grayscale(1);">👟</div>
+    <h4 style="font-family: 'Bebas Neue', sans-serif; font-size: 2rem; letter-spacing: 3px; color: rgba(255,255,255,0.4);">No products yet — check back soon!</h4>
+  </div>
+  {% endif %}
+
+  <!-- CTA -->
+  <div class="cta-banner reveal">
+    <div class="cta-orb1"></div>
+    <div class="cta-orb2"></div>
+    <h2>🎁 JOIN THE LUXURY CLUB</h2>
+    <p>Create a free account for exclusive drops, early access & members-only deals</p>
+    <a href="{{ url_for('auth.register') }}" class="btn-cta">Sign Up Free →</a>
+  </div>
+
+</div>
+
+<!-- Lightbox -->
+<div id="lb" onclick="closeLB()">
+  <div class="lb-x" onclick="closeLB()">✕</div>
+  <img id="lb-img" src="" alt="">
+  <div class="lb-info">
+    <h4 id="lb-name"></h4>
+    <p id="lb-brand"></p>
+    <p style="color:rgba(255,255,255,0.25);font-size:0.72rem;margin-top:8px;">Click anywhere to close · Esc to dismiss</p>
+  </div>
+</div>
+
+<script>
+// Particles
+(function() {
+  const c = document.getElementById('particles-canvas');
+  const ctx = c.getContext('2d');
+  let W, H, particles = [];
+  const COLORS = ['#FF2D87','#00E5FF','#A855F7','#FFD700','#FF6B35','#39FF14'];
+
+  function resize() {
+    W = c.width = window.innerWidth;
+    H = c.height = window.innerHeight;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  for (let i = 0; i < 70; i++) {
+    particles.push({
+      x: Math.random() * 2000, y: Math.random() * 1500,
+      r: Math.random() * 2 + 0.5,
+      vx: (Math.random() - 0.5) * 0.3,
+      vy: (Math.random() - 0.5) * 0.3,
+      color: COLORS[Math.floor(Math.random() * COLORS.length)],
+      alpha: Math.random() * 0.6 + 0.2
+    });
+  }
+
+  function draw() {
+    ctx.clearRect(0, 0, W, H);
+    particles.forEach(p => {
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fillStyle = p.color;
+      ctx.globalAlpha = p.alpha;
+      ctx.fill();
+      p.x += p.vx; p.y += p.vy;
+      if (p.x < 0) p.x = W;
+      if (p.x > W) p.x = 0;
+      if (p.y < 0) p.y = H;
+      if (p.y > H) p.y = 0;
+    });
+    ctx.globalAlpha = 1;
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+// Lightbox
+function openLB(src, name, brand) {
+  document.getElementById('lb-img').src = src;
+  document.getElementById('lb-name').textContent = name;
+  document.getElementById('lb-brand').textContent = brand;
+  document.getElementById('lb').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeLB() {
+  document.getElementById('lb').classList.remove('open');
+  document.body.style.overflow = '';
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLB(); });
+
+// Like button toggle
+function toggleLike(btn) {
+  btn.textContent = btn.textContent === '🤍' ? '❤️' : '🤍';
+  btn.style.transform = 'scale(1.3)';
+  setTimeout(() => btn.style.transform = '', 300);
+}
+
+// Scroll reveal
+const revealEls = document.querySelectorAll('.reveal');
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.classList.add('visible');
+      observer.unobserve(e.target);
+    }
+  });
+}, { threshold: 0.1 });
+revealEls.forEach(el => observer.observe(el));
+
+// Confetti burst on load
+(function confetti() {
+  const COLORS = ['#FF2D87','#00E5FF','#A855F7','#FFD700','#FF6B35','#39FF14'];
+  const container = document.body;
+  for (let i = 0; i < 50; i++) {
+    setTimeout(() => {
+      const el = document.createElement('div');
+      const size = Math.random() * 8 + 4;
+      el.style.cssText = `
+        position:fixed; width:${size}px; height:${size}px;
+        background:${COLORS[Math.floor(Math.random()*COLORS.length)]};
+        left:${Math.random()*100}vw; top:-20px;
+        border-radius:${Math.random() > 0.5 ? '50%' : '2px'};
+        pointer-events:none; z-index:9998;
+        animation: confetti-fall ${Math.random()*2+2}s linear forwards;
+        opacity:0.9;
+        transform: rotate(${Math.random()*360}deg);
+      `;
+      container.appendChild(el);
+      setTimeout(() => el.remove(), 4000);
+    }, i * 60);
+  }
+})();
+
+// Add confetti CSS
+const s = document.createElement('style');
+s.textContent = `
+@keyframes confetti-fall {
+  to { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+}`;
+document.head.appendChild(s);
+</script>
+
+{% endblock %}

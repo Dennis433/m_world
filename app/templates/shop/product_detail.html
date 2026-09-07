@@ -1,0 +1,311 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Nunito:wght@600;700;800;900&display=swap');
+
+.pd-wrap { max-width: 1100px; margin: 40px auto; padding: 0 16px; }
+.pd-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; }
+@media(max-width:768px){ .pd-grid{ grid-template-columns:1fr; } }
+
+.pd-img-box {
+  border-radius: 22px; overflow: hidden;
+  background: linear-gradient(135deg,#1a1a30,#111125);
+  border: 1px solid rgba(255,255,255,0.07);
+}
+.pd-img-box img { width:100%; object-fit:cover; display:block; }
+
+.pd-name { font-family:'Bebas Neue',sans-serif; font-size:3rem; letter-spacing:2px; color:#fff; line-height:1; margin-bottom:4px; }
+.pd-brand { color:rgba(255,255,255,0.4); font-weight:800; font-size:1rem; text-transform:uppercase; letter-spacing:2px; margin-bottom:16px; }
+.pd-cat { display:inline-block; background:rgba(0,229,255,0.15); border:1px solid rgba(0,229,255,0.4); color:#00E5FF; font-weight:800; font-size:0.72rem; text-transform:uppercase; letter-spacing:1.5px; padding:5px 14px; border-radius:20px; margin-bottom:18px; }
+.pd-price { font-family:'Bebas Neue',sans-serif; font-size:3rem; line-height:1; background:linear-gradient(135deg,#FFD700,#FF6B35); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; margin-bottom:16px; }
+.pd-desc { color:rgba(255,255,255,0.6); font-weight:600; line-height:1.6; margin-bottom:24px; }
+.pd-divider { height:1px; background:rgba(255,255,255,0.08); margin:24px 0; }
+
+.pd-label { color:#fff; font-weight:900; font-size:0.9rem; text-transform:uppercase; letter-spacing:1px; margin-bottom:12px; }
+.size-grid { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:20px; }
+.size-btn { display:none; }
+.size-lbl {
+  display:flex; align-items:center; justify-content:center;
+  min-width:52px; height:52px; padding:0 14px;
+  background:rgba(255,255,255,0.05); border:2px solid rgba(255,255,255,0.12);
+  border-radius:12px; color:rgba(255,255,255,0.6);
+  font-weight:900; cursor:pointer; transition:all 0.2s;
+}
+.size-lbl:hover { border-color:rgba(255,45,135,0.5); color:#fff; }
+.size-btn:checked + .size-lbl {
+  background:linear-gradient(135deg,#FF2D87,#A855F7);
+  border-color:transparent; color:#fff;
+  box-shadow:0 4px 20px rgba(255,45,135,0.4);
+}
+
+.stock-info { font-weight:800; font-size:0.9rem; margin-bottom:24px; }
+.stock-info.in { color:#39FF14; }
+.stock-info.out { color:#FF2D87; }
+
+.qty-row { display:flex; align-items:center; gap:14px; margin-bottom:20px; }
+.qty-input {
+  width:90px; height:52px; text-align:center;
+  background:rgba(255,255,255,0.05); border:2px solid rgba(255,255,255,0.12);
+  border-radius:12px; color:#fff; font-weight:900; font-size:1.1rem;
+}
+
+.action-btns { display:flex; gap:12px; flex-wrap:wrap; }
+.btn-cart {
+  flex:1; min-width:160px; padding:16px 28px;
+  background:rgba(255,255,255,0.07); border:2px solid rgba(255,255,255,0.18);
+  color:#fff; font-weight:900; font-size:0.95rem; border-radius:14px;
+  cursor:pointer; transition:all 0.25s; letter-spacing:0.5px;
+}
+.btn-cart:hover { background:rgba(255,255,255,0.13); transform:translateY(-2px); }
+.btn-buy {
+  flex:1; min-width:160px; padding:16px 28px;
+  background:linear-gradient(135deg,#FF6B00,#FFCC00); border:none;
+  color:#000; font-weight:900; font-size:0.95rem; border-radius:14px;
+  cursor:pointer; transition:all 0.25s; letter-spacing:0.5px;
+  box-shadow:0 6px 25px rgba(255,107,0,0.4);
+}
+.btn-buy:hover { transform:translateY(-2px); box-shadow:0 10px 40px rgba(255,107,0,0.55); }
+.btn-buy:disabled, .btn-cart:disabled { opacity:0.5; cursor:not-allowed; transform:none; }
+
+.btn-login {
+  display:inline-block; padding:16px 40px;
+  background:linear-gradient(135deg,#FF2D87,#A855F7); border:none;
+  color:#fff; font-weight:900; font-size:0.95rem; border-radius:14px;
+  text-decoration:none; box-shadow:0 6px 25px rgba(255,45,135,0.4); transition:all 0.25s;
+}
+.btn-login:hover { transform:translateY(-2px); color:#fff; }
+
+.btn-back { display:inline-block; margin-top:18px; color:rgba(255,255,255,0.4); font-weight:800; font-size:0.85rem; text-decoration:none; transition:color 0.2s; }
+.btn-back:hover { color:#fff; }
+.size-warn { color:#FFD700; font-weight:800; font-size:0.82rem; margin-bottom:12px; display:none; }
+
+/* Negotiate button */
+.btn-negotiate {
+  width:100%; margin-top:12px; padding:15px 28px;
+  background:rgba(168,85,247,0.12); border:2px dashed rgba(168,85,247,0.6);
+  color:#C77DFF; font-weight:900; font-size:0.95rem; border-radius:14px;
+  cursor:pointer; transition:all 0.25s; letter-spacing:0.5px;
+}
+.btn-negotiate:hover { background:rgba(168,85,247,0.22); border-style:solid; transform:translateY(-2px); }
+.btn-negotiate:disabled { opacity:0.4; cursor:not-allowed; transform:none; }
+
+/* Negotiate modal */
+.nego-overlay {
+  display:none; position:fixed; inset:0; z-index:9999;
+  background:rgba(6,6,16,0.85); backdrop-filter:blur(10px);
+  align-items:center; justify-content:center; padding:20px;
+}
+.nego-overlay.open { display:flex; }
+.nego-box {
+  width:100%; max-width:460px;
+  background:#0f0f20; border:1px solid rgba(168,85,247,0.3);
+  border-radius:24px; padding:32px; position:relative;
+  box-shadow:0 30px 80px rgba(0,0,0,0.6), 0 0 50px rgba(168,85,247,0.15);
+  animation:nego-pop 0.3s cubic-bezier(0.175,0.885,0.32,1.275);
+}
+@keyframes nego-pop { from{opacity:0; transform:scale(0.9) translateY(20px);} to{opacity:1; transform:scale(1) translateY(0);} }
+.nego-close {
+  position:absolute; top:18px; right:20px; width:36px; height:36px;
+  display:flex; align-items:center; justify-content:center;
+  background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12);
+  border-radius:50%; color:#fff; cursor:pointer; transition:all 0.2s; font-size:0.95rem;
+}
+.nego-close:hover { background:rgba(255,45,135,0.4); }
+.nego-title { font-family:'Bebas Neue',sans-serif; font-size:1.8rem; letter-spacing:2px; color:#fff; margin-bottom:18px; }
+.nego-product { display:flex; align-items:center; gap:14px; padding:14px; background:rgba(255,255,255,0.03); border-radius:14px; margin-bottom:20px; }
+.nego-product img { width:64px; height:64px; border-radius:12px; object-fit:cover; background:#1a1a30; }
+.nego-pname { font-weight:900; color:#fff; font-size:1rem; }
+.nego-listed { color:rgba(255,255,255,0.45); font-weight:700; font-size:0.82rem; margin-top:3px; }
+.nego-label { display:block; color:#fff; font-weight:800; font-size:0.82rem; text-transform:uppercase; letter-spacing:1px; margin-bottom:8px; }
+.nego-input-wrap { display:flex; align-items:center; background:rgba(255,255,255,0.05); border:2px solid rgba(255,255,255,0.12); border-radius:12px; margin-bottom:18px; overflow:hidden; transition:border-color 0.2s; }
+.nego-input-wrap:focus-within { border-color:#A855F7; }
+.nego-currency { padding:0 14px; font-family:'Bebas Neue',sans-serif; font-size:1.5rem; color:#FFD700; }
+.nego-input { flex:1; background:transparent; border:none; padding:14px 14px 14px 0; color:#fff; font-weight:900; font-size:1.2rem; outline:none; }
+.nego-textarea { width:100%; background:rgba(255,255,255,0.05); border:2px solid rgba(255,255,255,0.12); border-radius:12px; padding:12px 14px; color:#fff; font-family:'Nunito',sans-serif; font-weight:600; font-size:0.9rem; resize:vertical; outline:none; margin-bottom:8px; transition:border-color 0.2s; }
+.nego-textarea:focus { border-color:#A855F7; }
+.nego-note { color:#FFD700; font-weight:800; font-size:0.82rem; margin-bottom:14px; display:none; }
+.btn-send-offer { width:100%; padding:16px; background:linear-gradient(135deg,#A855F7,#FF2D87); border:none; color:#fff; font-weight:900; font-size:1.05rem; border-radius:14px; cursor:pointer; letter-spacing:0.5px; transition:all 0.25s; box-shadow:0 8px 30px rgba(168,85,247,0.4); }
+.btn-send-offer:hover { transform:translateY(-2px); box-shadow:0 12px 45px rgba(168,85,247,0.55); }
+.nego-hint { color:rgba(255,255,255,0.35); font-size:0.76rem; font-weight:600; text-align:center; margin-top:14px; line-height:1.5; }
+</style>
+
+<div class="pd-wrap">
+  <div class="pd-grid">
+
+    <!-- Image -->
+    <div class="pd-img-box">
+      <img src="{{ url_for('static', filename='images/' + product.image_file) }}" alt="{{ product.name }}">
+    </div>
+
+    <!-- Info -->
+    <div>
+      <div class="pd-name">{{ product.name }}</div>
+      <div class="pd-brand">{{ product.brand }}</div>
+      <span class="pd-cat">{{ product.category }}</span>
+      <div class="pd-price">₦{{ "{:,.0f}".format(product.price) }}</div>
+      <div class="pd-desc">{{ product.description }}</div>
+
+      <div class="pd-divider"></div>
+
+      {% if current_user.is_authenticated %}
+      <form method="POST" id="product-form" action="{{ url_for('cart.add_to_cart', product_id=product.id) }}">
+        <input type="hidden" name="size" id="selected_size">
+
+        <div class="pd-label">Select Size</div>
+        <div class="size-grid">
+          {% for size in product.get_sizes() %}
+          <input type="radio" class="size-btn" name="size_radio" id="size_{{ size }}" value="{{ size }}">
+          <label class="size-lbl" for="size_{{ size }}">{{ size }}</label>
+          {% endfor %}
+        </div>
+        <div class="size-warn" id="size-warn">⚠️ Please select a size first</div>
+
+        {% if product.stock > 0 %}
+          <div class="stock-info in">✅ In Stock ({{ product.stock }} available)</div>
+        {% else %}
+          <div class="stock-info out">❌ Out of Stock</div>
+        {% endif %}
+
+        <div class="pd-label">Quantity</div>
+        <div class="qty-row">
+          <input type="number" name="quantity" value="1" min="1" max="{{ product.stock }}" class="qty-input">
+        </div>
+
+        <div class="action-btns">
+          <button type="submit" class="btn-cart" {% if product.stock == 0 %}disabled{% endif %}>
+            🛒 Add to Cart
+          </button>
+          <button type="button" class="btn-buy" id="buy-now-btn" {% if product.stock == 0 %}disabled{% endif %}>
+            ⚡ Buy Now
+          </button>
+        </div>
+
+        <button type="button" class="btn-negotiate" id="open-negotiate" {% if product.stock == 0 %}disabled{% endif %}>
+          💬 Negotiate Price
+        </button>
+      </form>
+      {% else %}
+        <a href="{{ url_for('auth.login') }}" class="btn-login">🔐 Login to Buy</a>
+      {% endif %}
+
+      <a href="{{ url_for('shop.home') }}" class="btn-back">← Back to Shop</a>
+    </div>
+
+  </div>
+</div>
+
+{% if current_user.is_authenticated %}
+<!-- Negotiate Modal -->
+<div id="nego-modal" class="nego-overlay">
+  <div class="nego-box">
+    <div class="nego-close" id="nego-close">✕</div>
+    <div class="nego-title">💬 Make an Offer</div>
+    <div class="nego-product">
+      <img src="{{ url_for('static', filename='images/' + product.image_file) }}" alt="{{ product.name }}">
+      <div>
+        <div class="nego-pname">{{ product.name }}</div>
+        <div class="nego-listed">Listed at ₦{{ "{:,.0f}".format(product.price) }}</div>
+      </div>
+    </div>
+
+    <form method="POST" action="{{ url_for('negotiate.make_offer', product_id=product.id) }}" id="nego-form">
+      <input type="hidden" name="size" id="nego-size">
+      <input type="hidden" name="quantity" id="nego-qty" value="1">
+
+      <label class="nego-label">Your offer (price per pair)</label>
+      <div class="nego-input-wrap">
+        <span class="nego-currency">₦</span>
+        <input type="number" name="offer_price" id="nego-offer" class="nego-input"
+               placeholder="Enter your price" min="1" step="any" required>
+      </div>
+
+      <label class="nego-label">Message to seller (optional)</label>
+      <textarea name="message" class="nego-textarea" rows="3"
+                placeholder="e.g. I'd love these for my birthday — can you do this price?"></textarea>
+
+      <div class="nego-note" id="nego-size-note">⚠️ Please pick a size above first</div>
+
+      <button type="submit" class="btn-send-offer">Send Offer →</button>
+      <p class="nego-hint">The seller will review and respond. You'll see their reply under <b>My Offers</b>.</p>
+    </form>
+  </div>
+</div>
+{% endif %}
+
+<script>
+
+  const radios = document.querySelectorAll('input[name="size_radio"]');
+  const hiddenSize = document.getElementById('selected_size');
+  const sizeWarn = document.getElementById('size-warn');
+
+  radios.forEach(radio => {
+    radio.addEventListener('change', function() {
+      if (hiddenSize) hiddenSize.value = this.value;
+      if (sizeWarn) sizeWarn.style.display = 'none';
+    });
+  });
+
+  // Buy Now: set size, then submit to checkout
+  const buyBtn = document.getElementById('buy-now-btn');
+  if (buyBtn) {
+    buyBtn.addEventListener('click', function() {
+      if (!hiddenSize.value) {
+        sizeWarn.style.display = 'block';
+        return;
+      }
+      const form = document.getElementById('product-form');
+      form.action = "{{ url_for('cart.add_to_cart', product_id=product.id) }}?buy_now=1";
+      form.submit();
+    });
+  }
+
+  // Add to Cart also needs size validation
+  const form = document.getElementById('product-form');
+  if (form) {
+    form.addEventListener('submit', function(e) {
+      if (!hiddenSize.value) {
+        e.preventDefault();
+        sizeWarn.style.display = 'block';
+      }
+    });
+  }
+
+  // ── Negotiate modal ──
+  const negoModal   = document.getElementById('nego-modal');
+  const openNego    = document.getElementById('open-negotiate');
+  const closeNego   = document.getElementById('nego-close');
+  const negoSize    = document.getElementById('nego-size');
+  const negoQty     = document.getElementById('nego-qty');
+  const negoSizeNote = document.getElementById('nego-size-note');
+  const qtyInput    = document.querySelector('input[name="quantity"]');
+
+  if (openNego) {
+    openNego.addEventListener('click', function() {
+      // require a size first
+      if (!hiddenSize.value) {
+        sizeWarn.style.display = 'block';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        return;
+      }
+      negoSize.value = hiddenSize.value;
+      negoQty.value  = qtyInput ? qtyInput.value : 1;
+      if (negoSizeNote) negoSizeNote.style.display = 'none';
+      negoModal.classList.add('open');
+      document.body.style.overflow = 'hidden';
+    });
+  }
+  function closeModal() {
+    negoModal.classList.remove('open');
+    document.body.style.overflow = '';
+  }
+  if (closeNego) closeNego.addEventListener('click', closeModal);
+  if (negoModal) {
+    negoModal.addEventListener('click', function(e) {
+      if (e.target === negoModal) closeModal();
+    });
+  }
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+</script>
+
+{% endblock %}

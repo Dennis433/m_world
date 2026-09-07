@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<h2 class="fw-bold mb-4">Your Cart 🛒</h2>
+
+{% if cart_items %}
+<div class="table-responsive">
+    <table class="table table-bordered align-middle">
+        <thead class="table-dark">
+            <tr>
+                <th>Image</th>
+                <th>Product</th>
+                <th>Size</th>
+                <th>Price</th>
+                <th>Quantity</th>
+                <th>Subtotal</th>
+                <th>Remove</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in cart_items %}
+            <tr>
+                <td>
+                    <img src="{{ url_for('static', filename='images/' + item.product.image_file) }}"
+                         width="60" height="60" style="object-fit:cover; border-radius:6px;">
+                </td>
+                <td>{{ item.product.name }}<br><small class="text-muted">{{ item.product.brand }}</small></td>
+                <td>{{ item.size }}</td>
+                <td>${{ item.product.price }}</td>
+                <td>{{ item.quantity }}</td>
+                <td>${{ "%.2f"|format(item.product.price * item.quantity) }}</td>
+                <td>
+                    <a href="{{ url_for('cart.remove_from_cart', cart_id=item.id) }}"
+                       class="btn btn-sm btn-danger"
+                       onclick="return confirm('Remove this item?')">Remove</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Total & Checkout -->
+<div class="d-flex justify-content-end mt-3">
+    <div class="text-end">
+        <h4 class="fw-bold">Total: <span class="text-success">${{ "%.2f"|format(total) }}</span></h4>
+        <form method="POST" action="{{ url_for('cart.checkout') }}">
+            <button type="submit" class="btn btn-dark px-5 mt-2">
+                Place Order
+            </button>
+        </form>
+        <a href="{{ url_for('shop.home') }}" class="btn btn-outline-secondary mt-2">
+            ← Continue Shopping
+        </a>
+    </div>
+</div>
+
+{% else %}
+    <div class="text-center text-muted mt-5">
+        <h4>Your cart is empty.</h4>
+        <a href="{{ url_for('shop.home') }}" class="btn btn-dark mt-3">Continue Shopping</a>
+    </div>
+{% endif %}
+
+{% endblock %}

@@ -1,0 +1,123 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Nunito:wght@600;700;800;900&display=swap');
+
+.nc-wrap { max-width: 560px; margin: 40px auto; padding: 0 16px; }
+.nc-title { font-family:'Bebas Neue',sans-serif; font-size:2.6rem; letter-spacing:3px; color:#fff; margin-bottom:6px; }
+.nc-title span { background:linear-gradient(135deg,#FF6B00,#FFCC00); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+.nc-sub { color:rgba(255,255,255,0.4); font-weight:700; font-size:0.9rem; margin-bottom:30px; }
+
+.nc-card { background:#0f0f20; border:1px solid rgba(57,255,20,0.25); border-radius:22px; padding:28px; box-shadow:0 0 40px rgba(57,255,20,0.05); }
+.nc-deal { display:inline-block; background:rgba(57,255,20,0.12); border:1px solid rgba(57,255,20,0.4); color:#39FF14; font-weight:900; font-size:0.72rem; text-transform:uppercase; letter-spacing:1.5px; padding:5px 14px; border-radius:20px; margin-bottom:18px; }
+
+.nc-prod { display:flex; gap:16px; align-items:center; padding-bottom:20px; border-bottom:1px solid rgba(255,255,255,0.07); margin-bottom:20px; }
+.nc-prod img { width:80px; height:80px; border-radius:14px; object-fit:cover; background:#1a1a30; }
+.nc-pname { font-weight:900; color:#fff; font-size:1.1rem; }
+.nc-pmeta { color:rgba(255,255,255,0.4); font-weight:700; font-size:0.82rem; margin-top:4px; }
+
+.nc-row { display:flex; justify-content:space-between; align-items:center; padding:9px 0; }
+.nc-row .l { color:rgba(255,255,255,0.5); font-weight:800; font-size:0.85rem; text-transform:uppercase; letter-spacing:0.5px; }
+.nc-row .v { color:#fff; font-weight:900; }
+.nc-row .v.strike { color:rgba(255,255,255,0.3); text-decoration:line-through; font-weight:700; }
+.nc-row.grand { padding-top:16px; margin-top:8px; border-top:1px solid rgba(255,255,255,0.1); }
+.nc-row.grand .v { font-family:'Bebas Neue',sans-serif; font-size:2.2rem; background:linear-gradient(135deg,#FFD700,#FF6B35); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+.nc-save { color:#39FF14; font-weight:800; font-size:0.85rem; text-align:right; margin-top:4px; }
+
+.btn-pay { width:100%; margin-top:24px; padding:18px; background:linear-gradient(135deg,#FF6B00,#FFCC00); color:#000; font-weight:900; font-size:1.1rem; border:none; border-radius:16px; cursor:pointer; letter-spacing:1px; transition:all 0.25s; box-shadow:0 8px 30px rgba(255,107,0,0.4); display:flex; align-items:center; justify-content:center; gap:10px; }
+.btn-pay:hover { transform:translateY(-3px); box-shadow:0 14px 50px rgba(255,107,0,0.55); }
+.btn-pay:disabled { opacity:0.6; cursor:not-allowed; transform:none; }
+.flw-logo { display:flex; align-items:center; justify-content:center; gap:8px; margin-top:16px; color:rgba(255,255,255,0.25); font-size:0.72rem; font-weight:800; }
+.flw-dot { width:6px; height:6px; border-radius:50%; background:#FF6B00; }
+.back { display:block; text-align:center; margin-top:18px; color:rgba(255,255,255,0.35); font-weight:800; font-size:0.8rem; text-decoration:none; }
+.back:hover { color:#fff; }
+
+#pay-loading { display:none; position:fixed; inset:0; background:rgba(6,6,16,0.93); z-index:9999; flex-direction:column; align-items:center; justify-content:center; backdrop-filter:blur(10px); }
+#pay-loading.show { display:flex; }
+.spinner { width:60px; height:60px; border-radius:50%; border:4px solid rgba(255,255,255,0.1); border-top-color:#FF6B00; border-right-color:#FFCC00; animation:spin 0.8s linear infinite; margin-bottom:20px; }
+@keyframes spin { to{transform:rotate(360deg)} }
+#pay-loading p { color:#fff; font-weight:900; font-size:1rem; }
+</style>
+
+<div class="nc-wrap">
+  <div class="nc-title">PAY YOUR <span>PRICE</span></div>
+  <div class="nc-sub">Complete payment at your negotiated price</div>
+
+  <div class="nc-card">
+    <span class="nc-deal">✅ Negotiated Deal</span>
+
+    <div class="nc-prod">
+      <img src="{{ url_for('static', filename='images/' + nego.product.image_file) }}" alt="{{ nego.product.name }}">
+      <div>
+        <div class="nc-pname">{{ nego.product.name }}</div>
+        <div class="nc-pmeta">{{ nego.product.brand }} · Size {{ nego.size }} · Qty {{ nego.quantity }}</div>
+      </div>
+    </div>
+
+    <div class="nc-row">
+      <span class="l">Original price</span>
+      <span class="v strike">₦{{ "{:,.0f}".format(nego.product.price) }}</span>
+    </div>
+    <div class="nc-row">
+      <span class="l">Your price (each)</span>
+      <span class="v" style="color:#39FF14;">₦{{ "{:,.0f}".format(nego.current_price()) }}</span>
+    </div>
+    <div class="nc-row">
+      <span class="l">Quantity</span>
+      <span class="v">× {{ nego.quantity }}</span>
+    </div>
+    <div class="nc-row">
+      <span class="l">Delivery</span>
+      <span class="v" style="color:#39FF14;">FREE</span>
+    </div>
+    <div class="nc-row grand">
+      <span class="l">Total</span>
+      <span class="v">₦{{ "{:,.0f}".format(nego.total_amount()) }}</span>
+    </div>
+    {% set saved = (nego.product.price - nego.current_price()) * nego.quantity %}
+    {% if saved > 0 %}
+    <div class="nc-save">🎉 You saved ₦{{ "{:,.0f}".format(saved) }}!</div>
+    {% endif %}
+
+    <button class="btn-pay" id="pay-btn" onclick="payNego()">
+      <span>Pay ₦{{ "{:,.0f}".format(nego.total_amount()) }}</span><span>→</span>
+    </button>
+
+    <div class="flw-logo"><div class="flw-dot"></div> Secured by Flutterwave <div class="flw-dot"></div></div>
+    <a href="{{ url_for('negotiate.my_offers') }}" class="back">← Back to My Offers</a>
+  </div>
+</div>
+
+<div id="pay-loading">
+  <div class="spinner"></div>
+  <p>Connecting to Flutterwave...</p>
+</div>
+
+<script>
+async function payNego() {
+  const btn = document.getElementById('pay-btn');
+  const loading = document.getElementById('pay-loading');
+  btn.disabled = true;
+  btn.innerHTML = '<div style="width:20px;height:20px;border:3px solid rgba(0,0,0,0.3);border-top-color:#000;border-radius:50%;animation:spin 0.8s linear infinite;"></div> Processing...';
+  loading.classList.add('show');
+  try {
+    const res = await fetch('{{ url_for("negotiate.nego_payment", nego_id=nego.id) }}', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }
+    });
+    const data = await res.json();
+    if (data.payment_link) {
+      window.location.href = data.payment_link;
+    } else {
+      loading.classList.remove('show'); btn.disabled = false;
+      btn.innerHTML = '<span>Pay ₦{{ "{:,.0f}".format(nego.total_amount()) }}</span><span>→</span>';
+      alert('Payment error: ' + (data.error || 'Please try again.'));
+    }
+  } catch (err) {
+    loading.classList.remove('show'); btn.disabled = false;
+    btn.innerHTML = '<span>Pay ₦{{ "{:,.0f}".format(nego.total_amount()) }}</span><span>→</span>';
+    alert('Network error. Please try again.');
+  }
+}
+</script>
+{% endblock %}
