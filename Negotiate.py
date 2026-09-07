@@ -23,11 +23,11 @@ def whatsapp_link(number, text):
 @negotiate.route('/negotiate/<int:product_id>', methods=['POST'])
 @login_required
 def make_offer(product_id):
-    product   = Product.query.get_or_404(product_id)
-    size      = request.form.get('size')
-    quantity  = int(request.form.get('quantity', 1))
-    offer     = request.form.get('offer_price')
-    message   = request.form.get('message', '').strip()
+    product  = Product.query.get_or_404(product_id)
+    size     = request.form.get('size')
+    quantity = int(request.form.get('quantity', 1))
+    offer    = request.form.get('offer_price')
+    message  = request.form.get('message', '').strip()
 
     if not size:
         flash('Please select a size before negotiating.', 'warning')
@@ -69,7 +69,6 @@ def my_offers():
               .all())
 
     admin_wa = current_app.config.get('ADMIN_WHATSAPP', '')
-    # Pre-build WhatsApp links for each offer
     wa_links = {}
     for o in offers:
         text = (f"Hi M World Luxury! I'm negotiating on '{o.product.name}' "
@@ -189,7 +188,6 @@ def nego_callback():
     tx_ref         = request.args.get('tx_ref')
     transaction_id = request.args.get('transaction_id')
 
-    # extract negotiation id from tx_ref: MWORLD-NEGO-<id>-<rand>
     nego_id = None
     try:
         nego_id = int(tx_ref.split('-')[2])
@@ -209,7 +207,6 @@ def nego_callback():
         flash('This offer has already been paid.', 'info')
         return redirect(url_for('negotiate.my_offers'))
 
-    # Verify with Flutterwave
     secret_key = current_app.config.get('FLW_SECRET_KEY', '')
     headers    = {'Authorization': f'Bearer {secret_key}'}
     try:
@@ -223,7 +220,6 @@ def nego_callback():
                 and txn.get('currency') == 'NGN'
                 and float(txn.get('amount', 0)) >= nego.total_amount()):
 
-            # Create the order at the negotiated price
             order = Order(user_id=current_user.id, status='Paid',
                           payment_ref=tx_ref, is_negotiated=True)
             db.session.add(order)
@@ -234,11 +230,10 @@ def nego_callback():
                 product_id=nego.product_id,
                 quantity=nego.quantity,
                 size=nego.size,
-                price_each=nego.current_price()   # negotiated unit price
+                price_each=nego.current_price()
             )
             db.session.add(order_item)
 
-            # reduce stock
             if nego.product.stock >= nego.quantity:
                 nego.product.stock -= nego.quantity
 
@@ -271,7 +266,6 @@ def admin_negotiations():
         query = query.filter_by(status=status_filter)
     offers = query.order_by(Negotiation.updated_at.desc()).all()
 
-    # WhatsApp links to reach the customer (if they have a phone)
     wa_links = {}
     for o in offers:
         phone = o.user.phone
@@ -290,7 +284,7 @@ def admin_negotiations():
         'rejected':  Negotiation.query.filter_by(status='rejected').count(),
     }
 
-    return render_template('negotiate/admin_negotiations.html',
+    return render_template('admin_negotiations.html',
                            offers=offers, wa_links=wa_links,
                            counts=counts, status_filter=status_filter)
 
@@ -311,10 +305,9 @@ def admin_respond(nego_id):
     message = request.form.get('admin_message', '').strip()
 
     if action == 'accept':
-        # Admin accepts the user's exact offer
-        nego.admin_price  = nego.offer_price
-        nego.agreed_price = nego.offer_price
-        nego.status       = 'accepted'
+        nego.admin_price   = nego.offer_price
+        nego.agreed_price  = nego.offer_price
+        nego.status        = 'accepted'
         nego.admin_message = message or 'Offer accepted! You can proceed to payment.'
         flash(f'✅ Accepted offer #{nego.id}. Customer can now pay.', 'success')
 
